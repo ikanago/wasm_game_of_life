@@ -1,5 +1,6 @@
 use std::fmt;
 use wasm_bindgen::prelude::*;
+use js_sys::Math;
 
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
@@ -46,8 +47,8 @@ impl Universe {
 impl Universe {
     pub fn new(width: u32, height: u32) -> Universe {
         let cells = (0..width * height)
-            .map(|i| {
-                if i % 2 == 0 || i % 7 == 0 {
+            .map(|_| {
+                if Math::random() < 0.4 {
                     Cell::Alive
                 } else {
                     Cell::Dead
