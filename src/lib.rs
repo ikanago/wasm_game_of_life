@@ -14,6 +14,15 @@ pub enum Cell {
     Alive = 1,
 }
 
+impl Cell {
+    fn toggle(&mut self) {
+        *self = match *self {
+            Cell::Dead => Cell::Alive,
+            Cell::Alive => Cell::Dead,
+        };
+    }
+}
+
 #[wasm_bindgen]
 pub struct Universe {
     width: u32,
@@ -78,18 +87,26 @@ impl Universe {
                 let index = self.get_index(row, col);
                 let cell = self.cells[index];
                 let live_neighbors = self.count_live_neighbors(row, col);
-
-                let next_cell = match (cell, live_neighbors) {
-                    (Cell::Alive, x) if x < 2 => Cell::Dead,
-                    (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
-                    (Cell::Alive, x) if x > 3 => Cell::Dead,
-                    (Cell::Dead, 3) => Cell::Alive,
-                    (otherwise, _) => otherwise,
-                };
+                let next_cell = Universe::apply_rule(cell, live_neighbors);
                 next[index] = next_cell;
             }
         }
         self.cells = next;
+    }
+
+    fn apply_rule(cell: Cell, live_neighbors: u8) -> Cell {
+        match (cell, live_neighbors) {
+            (Cell::Alive, x) if x < 2 => Cell::Dead,
+            (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
+            (Cell::Alive, x) if x > 3 => Cell::Dead,
+            (Cell::Dead, 3) => Cell::Alive,
+            (otherwise, _) => otherwise,
+        }
+    }
+
+    pub fn toggle_cell(&mut self, row: u32, col: u32) {
+        let index =  self.get_index(row, col);
+        self.cells[index].toggle();
     }
 }
 
